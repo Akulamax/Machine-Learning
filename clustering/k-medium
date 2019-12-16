@@ -1,0 +1,49 @@
+from function import *
+from Data_file import *
+
+def find_minimum(point, data):
+    min = -1
+    answer = 0
+    for data0 in data:
+        distance0 = distance(point[0], point[1], data0[0], data0[1])
+        if point != data0 and (min > distance0 or min == -1):
+            min = distance0
+            answer = data0
+    return answer
+
+def find_center(data):
+    x = data[0]
+    y = data[1]
+    if 350 ** 2 < (x - CANVAS // 2) ** 2 + (y - CANVAS // 2) ** 2 < (CANVAS - 600) ** 2:
+        return 1
+    else:
+        return 0
+
+
+def check_point_in_cluster(point_main, point):
+    if point[2] == point_main[2]:
+        return 1
+    else:
+        return 0
+
+
+def K_medium(sample, clusters, k):
+    result = []
+    for data in sample:
+        temp_sample = []
+        for cluster0 in clusters:
+            for touch in cluster0:
+                temp_sample.append(touch)
+        neighbour = []
+        sum = 0
+        for i in range(k):
+            new_point = find_minimum(data, temp_sample)
+            temp_sample.remove(new_point)
+            neighbour.append(new_point)
+        for point in neighbour:
+            sum += check_point_in_cluster(data, point)
+        result.append(sum)
+    result = sorted(result)
+    return result
+
+
