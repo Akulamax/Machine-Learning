@@ -1,0 +1,45 @@
+import function
+
+
+class K_means(object):
+
+    def __init__(self, data_array, centers_array):
+        self._data_array = data_array
+        self._number_of_clusters = len(centers_array)
+        self._centers_array = centers_array
+
+    def K_means_cluster(self):  # K-means
+        clusters_array = []
+        for i in range(self._number_of_clusters):
+            clusters_array.append([])
+        center_index = 0
+        x = 0
+        y = 0
+        what_cluster = 0
+        for data in self._data_array:
+            center_index0 = -1
+            min = -1
+            for center in self._centers_array:
+                center_index0 += 1
+                if min > function.distance(data[0], data[1], center[0], center[1]) or min == -1:
+                    min = function.distance(data[0], data[1], center[0], center[1])
+                    x = data[0]
+                    y = data[1]
+                    what_cluster = data[2]
+                    center_index = center_index0
+            clusters_array[center_index].append([x, y, what_cluster])
+        return clusters_array
+
+    def K_means(self):
+        centers_array = []
+        clusters_array = self.K_means_cluster()
+        for cluster in clusters_array:
+            sum_points_x = 0
+            sum_points_y = 0
+            count = 0
+            for point in cluster:
+                sum_points_x += point[0]
+                sum_points_y += point[1]
+                count += 1
+            centers_array.append([sum_points_x // count, sum_points_y // count])
+        return centers_array
