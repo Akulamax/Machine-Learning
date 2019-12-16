@@ -1,0 +1,155 @@
+import random
+import stddraw
+import function
+from Ierarhic_file import *
+AMOUNT_OF_DATA = 10000  # количество точек
+CANVAS = 1000  # размер поля
+AMOUNT_OF_SAMPLE = AMOUNT_OF_DATA // 100  # размер выборки
+AMOUNT_OF_LEARNING = 5  # количество итераций дообучения
+
+
+def generation(data_array):  # генерация данных
+    for i in range(AMOUNT_OF_DATA):
+        data_array.append([[random.randint(0, CANVAS), random.randint(0, CANVAS)]])
+    return data_array
+
+def separation(data_array):  # деление пополам: одна для прогона, вторая для дообучения
+    newlist = [[], []]
+    for i in range(len(data_array) // 2 - 1):
+        if data_array[i] not in newlist[0]:
+            newlist[0].append(data_array[i])
+    for i in range(len(data_array) // 2, len(data_array) - 1):
+        if data_array[i] not in newlist[1]:
+            newlist[1].append(data_array[i])
+    return newlist
+
+
+def generation_test1():  # количество кластеров - 2
+    test = []
+    while len(test) < 700:
+        x = random.randint(100, 900)
+        y = random.randint(100, 900)
+        if (x - CANVAS // 2) ** 2 + (y - CANVAS // 2) ** 2 < 50 ** 2:
+            test.append([x, y, 1])
+        x2 = random.randint(100, 900)
+        y2 = random.randint(100, 900)
+        if 350 ** 2 < (x2 - CANVAS // 2) ** 2 + (y2 - CANVAS // 2) ** 2 < (CANVAS - 600) ** 2:
+            test.append([x2, y2, 2])
+    return test
+
+# test0 = [[50,50], [51, 51], [52, 52], [53, 53], [54, 54], [100, 100], [100, 0], [0, 100], [0, 0], [75, 75], [25, 25]]
+
+
+def generation_test2():  # количество кластеров - 2
+    test = []
+    for i in range(AMOUNT_OF_DATA - 9600):
+        x1 = random.randint(100, 450)
+        y1 = random.randint(100, 450)
+        x2 = random.randint(550, 950)
+        y2 = random.randint(550, 950)
+        test.append([x1, y1, 1])
+        test.append([x2, y2, 2])
+    return test
+
+
+def generation_test3():  # количество кластеров - 4
+    test = []
+    while len(test) < 2000:
+        x1 = random.randint(100, 900)
+        y1 = random.randint(100, 900)
+        x2 = random.randint(100, 900)
+        y2 = random.randint(100, 900)
+        if 180 ** 2 <= (x1 - CANVAS // 2 + 140) ** 2 + (y1 - CANVAS // 2) ** 2 <= 250 ** 2:
+            test.append([x1, y1, 1])
+        if 180 ** 2 <= (x2 - CANVAS // 2 - 140) ** 2 + (y2 - CANVAS // 2) ** 2 <= 250 ** 2:
+            test.append([x2, y2, 2])
+
+    return test
+
+def learning_matrix(clasters, data_array):  # функция генерирующая новые данные (с данными для дообучения)
+    new_data = []
+    count = 0
+    for data_set in clasters:
+        for data in data_set:
+            count += 1
+            if count % 5 != 0:
+                new_data.append([data])
+    for data in data_array:
+        new_data.append(data)
+    return new_data
+
+
+def learning_data(data):  # разбиение массива с данными для дообучения на AMOUNT_OF_LEARNING групп
+    num = AMOUNT_OF_LEARNING
+    avg = len(data) / float(num)
+    out = []
+    last = 0.0
+    while last < len(data):
+        out.append(data[int(last):int(last + avg)])
+        last += avg
+    return out
+
+
+class Data(object):
+
+    def __init__(self, data_array):
+        self._data_array = data_array
+        self._number_of_data = len(data_array)
+
+    def sample(self):  # выборка данных
+        sample_array = []
+        for i in range(AMOUNT_OF_SAMPLE - 1):
+            sample_array.append(self._data_array[random.randint(0, len(self._data_array) - 1)])
+        new_list = []
+        for i in range(AMOUNT_OF_SAMPLE - 1):       # убрать повторяющиеся точки
+            if sample_array[i] not in new_list:
+                new_list.append(sample_array[i])
+        return new_list
+
+
+
+"""
+test = generation_test3()
+
+stddraw.setCanvasSize(CANVAS, CANVAS)
+stddraw.setYscale(0, CANVAS)
+stddraw.setXscale(0, CANVAS)
+
+for i in range(len(test)):
+    stddraw.setPenColor(stddraw.BLACK)
+    stddraw.setPenRadius(0.003)
+    stddraw.point(test[i][0], test[i][1])
+stddraw.show()
+"""
+
+"""
+def new_generation():
+    mus = generation_test2()
+    for i in range(100):
+        mus.append([random.randint(0, CANVAS), random.randint(0, CANVAS)])
+    return mus
+
+
+arr = new_generation()
+arr = function.matrix_to_complex(arr)
+print(len(arr), arr)
+stddraw.setCanvasSize(CANVAS, CANVAS)
+stddraw.setYscale(0, CANVAS)
+stddraw.setXscale(0, CANVAS)
+for j in range(len(arr)):
+    stddraw.setPenColor(stddraw.BLACK)
+    stddraw.setPenRadius(0.01)
+    stddraw.point(arr[j][0][0], arr[j][0][1])
+stddraw.show(1000)
+stddraw.show()
+ierarhic = Ierarhic(arr)
+new_mus = ierarhic.Ierarhic1()
+print(new_mus)
+print("hello")
+for j in range(len(new_mus)):
+    stddraw.setPenColor(stddraw.BLACK)
+    stddraw.setPenRadius(0.01)
+    stddraw.point(new_mus[j][0][0], new_mus[j][0][1])
+stddraw.show(1000)
+stddraw.show()
+"""
