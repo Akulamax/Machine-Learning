@@ -1,0 +1,81 @@
+import os
+import numpy as np
+from skimage import io
+from sklearn.metrics import accuracy_score
+from sklearn import svm
+from sklearn.utils import shuffle
+import warnings
+import time
+
+def preprocessing(image_names, N):
+    Vector = np.zeros((len(image_names), (N ** 2)*3))
+
+    for i in range(0, len(image_names)):
+        red_sum = 0
+        green_sum = 0
+        blue_sum = 0
+        count = 0
+        images = io.imread(image_names[i])
+        size = len(images)
+
+        for line in range(0, N):
+            for row in range(0, N):
+                for array in range((size//N)*row, (size//N)*(row + 1)):
+                    for image in images[(array//N)*(line + 1)]:
+                        if image[0] > 20:
+                            c = image[0]
+                            red_sum += c
+                        if image[1] > 20:
+                            c = image[1]
+                            green_sum += c
+                        if image[2] > 20:
+                            c = image[2]
+                            blue_sum += c
+                        count += 1
+                #Vector[i,N*row + line] = (red_sum + green_sum + blue_sum) / count
+                Vector[i, (N*row+line)*3] = red_sum / count
+                Vector[i, (N*row+line)*3 + 1] = green_sum / count
+                Vector[i, (N*row+line)*3 + 2] = blue_sum / count
+                red_sum = 0
+                green_sum = 0
+                blue_sum = 0
+                count = 0
+    return Vector
+
+
+warnings.filterwarnings('ignore')
+start_time = time.time()
+
+Landscapes = os.listdir('./Landscapes')
+Landscapes = ['./Landscapes/'+x for x in Landscapes]
+Landscapes_answers = np.ones(len(Landscapes))
+
+Other = os.listdir('./Other')
+Other = ['./Other/'+x for x in Other]
+Other_answers = np.zeros(len(Other))
+
+Landscapes_test = os.listdir('./Landscapes_test')
+Landscapes_test = ['./Landscapes_test/'+x for x in Landscapes_test]
+Landscapes_test_answers = np.ones(len(Landscapes_test))
+
+Other_test = os.listdir('./Other_test')
+Other_test = ['./Other_test/'+x for x in Other_test]
+Other_test_answers = np.zeros(len(Other_test))
+
+data_main = Landscapes + Other
+answer_main = np.concatenate((Landscapes_answers, Other_answers))
+data_test = Landscapes_test + Other_test
+answer_test = np.concatenate((Landscapes_test_answers, Other_test_answers))
+data_main, answer_main = shuffle(data_main, answer_main, random_state=50)
+
+X = preprocessing(data_main, 5)
+y = answer_main
+print(X)
+svc = svm.SVC(kernel='linear', C=1).fit(X, y)
+
+NewX = preprocessing(data_test, 5)
+prediction = svc.predict(NewX)
+print(prediction)
+print(answer_test)
+print('Prediction accuracy is {}%'.format(accuracy_score(prediction, answer_test) * 100))
+print("--- %s seconds ---" % (time.time() - start_time))
