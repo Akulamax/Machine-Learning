@@ -1,0 +1,50 @@
+import function
+
+
+WEIGHT = 2  # количество кластеров
+
+
+def Ierarhic2(data_array):
+    centers = []
+    for i in range(len(data_array)):
+        centerX = 0
+        centerY = 0
+        count = 0
+        for data in data_array[i]:
+            centerX += data[0]
+            centerY += data[1]
+            count += 1
+        centers.append([centerX // count, centerY // count])
+    return centers
+
+
+class Ierarhic(object):
+
+    def __init__(self, sample_array):
+        self._sample_array = sample_array
+
+    def Ierarhic1(self):  # иерархическая кластеризация
+        data01 = 0
+        data02 = 0
+        sample_array = self._sample_array  # function.matrix_to_complex(self._sample_array)
+        while len(sample_array) > WEIGHT:
+            min = -1
+            for data1 in sample_array:
+                for data2 in sample_array:
+                    for point1 in data1:
+                        for point2 in data2:
+                            if data1 != data2 and point1 != point2 and (
+                                    min > function.distance(point1[0], point1[1], point2[0], point2[1]) or min == -1):
+                                min = function.distance(point1[0], point1[1], point2[0], point2[1])
+                                data01 = data1
+                                data02 = data2
+                            else:
+                                continue
+            point0 = data01 + data02
+            new_sample_array = []
+            for data in sample_array:
+                if data != data01 and data != data02:
+                    new_sample_array.append(data)
+            new_sample_array.append(point0)
+            sample_array = new_sample_array
+        return sample_array
